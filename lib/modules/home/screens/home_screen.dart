@@ -34,6 +34,16 @@ class HomeScreen extends StatefulWidget implements AutoRouteWrapper {
 class _HomeScreenState extends State<HomeScreen> {
   bool onlyFav = false;
   TextEditingController txtSearch = TextEditingController();
+  final MethodChannel platformChannel = const MethodChannel('my_channel');
+
+  int _batteryLevel = 0;
+
+  @override
+  void initState() {
+    fetchDataFromNative();
+    _getBatteryLevel();
+    super.initState();
+  }
 
   @override
   void dispose() {
@@ -50,6 +60,7 @@ class _HomeScreenState extends State<HomeScreen> {
         backgroundColor: Colors.purple.shade100,
         title: const Text('BLoC Crud'),
         actions: [
+          Text('$_batteryLevel'),
           IconButton(
             onPressed: () {
               router.push(const MyPainter());
@@ -200,8 +211,31 @@ class _HomeScreenState extends State<HomeScreen> {
         onPressed: () {
           router.push(AddRoute(crudBloc: context.read<CrudBloc>()));
         },
+        // isExtended: true,
+        // shape: RoundedRectangleBorder(),
         child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+      ),
     );
+  }
+
+  void fetchDataFromNative() async {
+    try {
+      final String result = await platformChannel.invokeMethod('getDataFromNative');
+      print('Result from Native::::::::::::::::::::::::::::::::::::: $result');
+    } on PlatformException catch (e) {
+      print('Error::::::::::::::::::::::::::::::: ${e.message}');
+    }
+  }
+
+  Future<void> _getBatteryLevel() async {
+    try {
+      final int result = await platformChannel.invokeMethod('getBatteryLevel');
+      setState(() {
+        _batteryLevel = result;
+      });
+      print('Battery level at :::::::::::::::::::::::::: $result % .');
+    } on PlatformException catch (e) {
+      print('Failed to get battery level:::::::::::::::::: ${e.message}');
+    }
   }
 }

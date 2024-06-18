@@ -7,6 +7,7 @@ import 'package:task_crud/constants/enum/status.dart';
 import 'package:task_crud/constants/routes/app_router.gr.dart';
 import 'package:task_crud/modules/home/bloc/crud_bloc.dart';
 import 'package:task_crud/modules/home/model/crud_model.dart';
+import 'package:task_crud/modules/home/repository/todo_repository.dart';
 
 @RoutePage()
 class HomeScreen extends StatefulWidget implements AutoRouteWrapper {
@@ -17,12 +18,16 @@ class HomeScreen extends StatefulWidget implements AutoRouteWrapper {
 
   @override
   Widget wrappedRoute(BuildContext context) {
-    return BlocProvider(
-      create: (context) {
-        return CrudBloc()..add(GetEvent());
-      },
-      child: this,
-    );
+    return MultiBlocProvider(providers: [
+      RepositoryProvider(
+        create: (context) => const TodoRepository(),
+      ),
+      BlocProvider(
+        create: (context) {
+          return CrudBloc(todoRepository: context.read<TodoRepository>())..add(GetEvent());
+        },
+      ),
+    ], child: this);
   }
 }
 

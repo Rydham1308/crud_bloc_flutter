@@ -24,12 +24,12 @@ class CrudModel {
         'id': id,
         'title': title,
         'description': description,
-        'is_fav': fav,
+        'is_fav': fav == true ? 1 : 0,
       };
 
   CrudModel.fromJson(Map<String, dynamic> json)
-      : id = json['id'],
-        title = json['title'],
-        description = json['description'],
-        fav = json['is_fav'];
+      : id = json['id'] ?? 0,
+        title = json['title'] ?? '',
+        description = json['description'] ?? '',
+        fav = (json['is_fav'] ?? 0) == 1 ? true : false;
 }

@@ -1,10 +1,16 @@
+import 'package:encrypt/encrypt.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:task_crud/constants/helpers/database_constant.dart';
 
+
 class DbHelper {
   static late Database _db;
+
+  final key = Key.fromUtf8('my 32 length key................');// Use a 32-byte key
+  final iv = IV.allZerosOfLength(16);    // Use a 16-byte IV
+
 
   Future<void> initializeDb(String dbPath) async {
     final path = join(dbPath, DatabaseConstant.dbName);
@@ -41,7 +47,24 @@ class DbHelper {
     return result.isNotEmpty;
   }
 
+
+  String encryptData(String data) {
+    print(key.base64);
+    print(iv.base16);
+    final encrypter = Encrypter(AES(key));
+    final encrypted = encrypter.encrypt(data, iv: iv);
+    return encrypted.base64;
+  }
+
+  String decryptData(String encryptedData) {
+    final encrypter = Encrypter(AES(key));
+    final decrypted = encrypter.decrypt64(encryptedData, iv: iv);
+    return decrypted;
+  }
+
   Future<int> insertTable(String tableName, Map<String, dynamic> insertQuery) async {
+
+
     return _db.insert(
       tableName,
       insertQuery,

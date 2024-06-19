@@ -35,7 +35,7 @@ class _HomeScreenState extends State<HomeScreen> {
   bool onlyFav = false;
   TextEditingController txtSearch = TextEditingController();
   final MethodChannel platformChannel = const MethodChannel('my_channel');
-
+  EventChannel eventChannel = const EventChannel('timeHandlerEvent');
   int _batteryLevel = 0;
 
   @override
@@ -60,7 +60,22 @@ class _HomeScreenState extends State<HomeScreen> {
         backgroundColor: Colors.purple.shade100,
         title: const Text('BLoC Crud'),
         actions: [
-          Text('$_batteryLevel'),
+          StreamBuilder<String>(
+            stream: streamTimeFromNative(),
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                return Text(
+                  '${snapshot.data}',
+                );
+              } else {
+                return const CircularProgressIndicator();
+              }
+            },
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text('$_batteryLevel'),
+          ),
           IconButton(
             onPressed: () {
               router.push(const MyPainter());
@@ -216,6 +231,10 @@ class _HomeScreenState extends State<HomeScreen> {
         child: const Icon(Icons.add),
       ),
     );
+  }
+
+  Stream<String> streamTimeFromNative() {
+    return eventChannel.receiveBroadcastStream().map((event) => event.toString());
   }
 
   void fetchDataFromNative() async {
